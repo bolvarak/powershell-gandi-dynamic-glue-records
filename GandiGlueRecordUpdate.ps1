@@ -1,14 +1,56 @@
 Param()
 
+###############################################################################
+### Globals ###################################################################
+###############################################################################
+
+## This is the path where statuses and information will be logged
 $LOG_FILE_PATH = '<path-to-log-file>'
+
+## This is the API key you will need from Gandi to run these operations
+## This must be an XML-RPC v4 API KEY
 $GANDI_API_KEY = '<gandi-xml-rpc-api-key>'
-$GANDI_API_ENDPOINT = 'https://rpc.gandi.net/xmlrpc/'
+
+## This is an array of FQDN glue records you want updated
 $GANDI_GLUE_RECORDS = @(
     'ns1.<domain>.<tld>',
     'ns2.<domain>.<tld>'
 )
+
+## This is the default endpoint for the Gandi v4 XML-RPC API
+$GANDI_API_ENDPOINT = 'https://rpc.gandi.net/xmlrpc/'
+
+## This web-service will load your IPv4 address
 $WEB_SERVICE_IPv4 = 'http://v4.ipv6-test.com/api/myip.php'
+
+## This web-service will load your IPv6 address
 $WEB_SERVICE_IPv6 = 'http://v6.ipv6-test.com/api/myip.php'
+
+###############################################################################
+### Functions/Helpers #########################################################
+###############################################################################
+
+Function Log-Append {
+    
+    [CmdletBinding()]
+    [OutputType(
+        [Void]
+    )]
+
+    Param (
+        [String] $Message
+    )
+
+    Begin {}
+
+    Process {
+        ## Write to the log file
+        Add-Content -Path $logFile $((Get-Date).ToString() + ' - ' + $Message)
+    }
+
+    End {}
+
+}
 
 Function Write-XmlToScreen {
     
@@ -128,6 +170,10 @@ Function Gandi-UpdateGlueRecord {
     End {}
 }
 
+###############################################################################
+### Main Event Loop ###########################################################
+###############################################################################
+
 ## Define our IPv4 container
 $ipv4 = ''
 ## Define our IPv6 container
@@ -137,7 +183,7 @@ $requestIPv4 = Invoke-WebRequest -Uri $WEB_SERVICE_IPv4 -Method Get
 ## Make sure everything went well
 if ($requestIPv4.StatusCode -ne 200) {
     ## Log the message
-    Add-Content -Path $LOG_FILE_PATH $((Get-Date).ToString() + ' - Failed to load IPv4:  ' + $requestIPv4.StatusDescription)
+    Log-Append -Message  ('Failed to load IPv4:  ' + $requestIPv4.StatusDescription)
     ## We're done
     Exit
 }
@@ -146,7 +192,7 @@ $requestIPv6 = Invoke-WebRequest -Uri $WEB_SERVICE_IPv6 -Method Get
 ## Make sure everything went well
 if ($requestIPv6.StatusCode -ne 200) {
     ## Log the message
-    Add-Content -Path $LOG_FILE_PATH $((Get-Date).ToString() + ' - Failed to load IPv6:  ' + $requestIPv4.StatusDescription)
+    Log-Append -Message  (' - Failed to load IPv6:  ' + $requestIPv4.StatusDescription)
     ## We're done
     Exit
 }
@@ -157,15 +203,19 @@ $ipv6 = $requestIPv6.Content
 ## Load the API version
 $apiVersion = Gandi-GetApiVersion
 ## Log the IPv4
-Add-Content -Path $LOG_FILE_PATH $((Get-Date).ToString() + ' - Current IPv4:  ' + $ipv4)
+Log-Append -Message ('Current IPv4:  ' + $ipv4)
 ## Log the IPv6
-Add-Content -Path $LOG_FILE_PATH $((Get-Date).ToString() + ' - Current IPv6:  ' + $ipv6)
+Log-Append -Message ('Current IPv6:  ' + $ipv6)
 ## Log the API version
-Add-Content -Path $LOG_FILE_PATH $((Get-Date).ToString() + ' - Gandi API Version:  ' + $apiVersion)
+Log-Append -Message ('Gandi API Version:  ' + $apiVersion)
 ## Iterate over the glue records
 foreach ($record in $GANDI_GLUE_RECORDS) {
     ## Update the record
     $recordUpdate = Gandi-UpdateGlueRecord -GlueRecord $record -IPv4 $ipv4 -IPv6 $ipv6
     ## Log the result
-    Add-Content -Path $LOG_FILE_PATH $((Get-Date).ToString() + ' - ' + $recordUpdate)
+    Log-Append -Message $recordUpdate
 }
+
+###############################################################################
+### End #######################################################################
+###############################################################################
