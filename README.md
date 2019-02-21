@@ -7,3 +7,4 @@ This repository contains a PowerShell example for udating Gandi Domain Hosts or 
 
 ## TODOs
 - Update to Gandi APIv5 once the functionality is released from Gandi
+- Add previous address store to only update hosts on change
