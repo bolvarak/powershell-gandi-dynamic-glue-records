@@ -183,7 +183,7 @@ $requestIPv4 = Invoke-WebRequest -Uri $WEB_SERVICE_IPv4 -Method Get
 ## Make sure everything went well
 if ($requestIPv4.StatusCode -ne 200) {
     ## Log the message
-    Log-Append -Message  ('Failed to load IPv4:  ' + $requestIPv4.StatusDescription)
+    Log-Append -Message ('Failed to load IPv4:  ' + $requestIPv4.StatusDescription)
     ## We're done
     Exit
 }
@@ -192,7 +192,7 @@ $requestIPv6 = Invoke-WebRequest -Uri $WEB_SERVICE_IPv6 -Method Get
 ## Make sure everything went well
 if ($requestIPv6.StatusCode -ne 200) {
     ## Log the message
-    Log-Append -Message  (' - Failed to load IPv6:  ' + $requestIPv4.StatusDescription)
+    Log-Append -Message (' - Failed to load IPv6:  ' + $requestIPv4.StatusDescription)
     ## We're done
     Exit
 }
