@@ -45,7 +45,7 @@ Function Log-Append {
 
     Process {
         ## Write to the log file
-        Add-Content -Path $logFile $((Get-Date).ToString() + ' - ' + $Message)
+        Add-Content -Path $LOG_FILE_PATH $((Get-Date).ToString() + ' - ' + $Message)
     }
 
     End {}
